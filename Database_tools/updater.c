@@ -25,6 +25,7 @@ int main()
 	FILE *output;
 	FILE *ingest;
 	char line[LINE_MAX];
+	bool inlist = false;
 
 	database_list.next = NULL;	// sets first in list pointer to null
 	ingest_list.next = NULL;	// sets first in list pointer to null
@@ -61,7 +62,14 @@ int main()
 		// gets owner of item
 		token = strtok( NULL, "\n" );
 		strncpy( data_node->owner, token, sizeof( data_node->owner ) - 1 );
+
+		// sets a pointer to the current node
+		prev_node = data_node;
 	}
+	// removes extra trailing node
+	free( data_node );
+	// sets the pointer of last node in list to NULL
+	prev_node->next = NULL;
 	fclose( output );	// closes output file after reading into list
 
 	list_start = &input_list;
@@ -80,22 +88,50 @@ int main()
 		// gets owner of item
 		token = strtok( NULL, "\n" );
 		strncpy( input_node->owner, token, sizeof( input_node->owner ) - 1 );
+
+		// sets a pointer to the current node
+		prev_node = input_node;
 	}
+	// removes extra trailing node
+	free( input_node );
+	// sets the pointer of last node in list to NULL
+	prev_node->next = NULL;
 	fclose( input );
 
-	data_node = &database_list;
-	list_start = &input_list;
-	input_node = list_start;
+	input_node = &input_list;
+	prev_node = NULL;
+
 	do
 	{
-		transfer.name = input_node->name;
-		transfer.count = input_node->count;
-		transfer.owner = input_node->owner;
-
+		data_node = &database_list;
+		inlist = false;
 		do
 		{
-		} while ();
-	} while ( input_node->next != NULL );
+			// compares the item name and owner
+			if ( strcmp( input_node->name, data_node->name ) == 0 && strcmp( input_node->owner, data_node->owner ) == 0 )
+			{
+				data_node->count += input_node->count;
+				input_node = input_node->next;
+				inlist = true;
+				break;
+			}
+			else
+			{
+				prev_node = data_node;
+				data_node = data_node->next;
+			}
+		} while ( data_node != NULL );
+
+		if ( inlist == false )
+		{
+			// data node is reassigned make the following function calls more clear
+			data_node = prev_node;
+			addNode( *data_node );
+			nodecpy( input_node, data_node );
+
+			input_node = input_node->next;
+		}
+	} while ( input_node != NULL );
 
 	output = fopen( "master_database.csv", "w" );
 	if ( output == NULL )
@@ -110,6 +146,7 @@ void addNode( ItemNode_t *node )
 {
 	node->next = ( ItemNode_t* )malloc( sizeof( ItemNode_t ) );
 	node = node->next;
+	// defaults the pointer to next node to NULL for last node in list
 	node->next = NULL;
 }
 
@@ -118,6 +155,7 @@ void alpha( ItemNode_t list )
 {
 	ItemNode_t *working = NULL;
 	ItemNode_t *prev = NULL;
+	ItemNode_t temp;
 	prev = &list;
 	working = prev->next;
 	int compare = 0;
@@ -129,10 +167,31 @@ void alpha( ItemNode_t list )
 		if ( compare <= 0 )
 		{
 			// nodes are in alphabetical order
+			// advances node pointers to next node
+			prev = prev->next;
+			working = working->next;
+			continue;
 		}	
 		else if ( compare > 0 )
 		{
 			// nodes are not in alphabetical order
+			nodecpy( prev, &temp );
+			nodecpy( working, prev );
+			nodecpy( &temp, working );
+
+			// sets node pointers back to start of list
+			// setting the pointers back lets the entire list get sorted completely in one function call
+			prev = &list;
+			working = prev->next;
+			continue;
 		}
-	} while ( working->next != NULL );
+	} while ( working != NULL );
+}
+
+// copies the contents of one structure to another
+void nodecpy( ItemNode_t *from, ItemNode_t *to )
+{
+	strcpy( to->name, from->name );
+	to->count = from->count;
+	strcpy( to->owner, from->owner );
 }
