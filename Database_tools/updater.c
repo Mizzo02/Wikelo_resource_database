@@ -5,6 +5,7 @@
 
 #define LINE_MAX	1024
 #define INPUT_FILE	"input.csv"
+#define OUTPUT_FILE "master_database.csv"
 
 typedef struct ItemNode
 {
@@ -17,6 +18,7 @@ typedef struct ItemNode
 void addNode( ItemNode_t **node );
 void alpha( ItemNode_t* list );
 void nodecpy( ItemNode_t* from, ItemNode_t* to );
+void printNode( ItemNode_t node );	// used for debuging if needed
 
 ItemNode_t database_list;	// global variable to allow list to be accesed directly everywhere
 ItemNode_t ingest_list;		// global variable to allow list to be accesed directly everywhere
@@ -32,6 +34,7 @@ int main()
 	FILE *ingest;
 	char line[LINE_MAX];
 	bool inlist = false;
+	int debug = 0;
 
 	database_list.next = NULL;	// sets first in list pointer to null
 	ingest_list.next = NULL;	// sets first in list pointer to null
@@ -42,15 +45,11 @@ int main()
 		fprintf( stderr, "Error opening file: %s\n", INPUT_FILE );
 		return 1;
 	}
-	else
-	{
-		printf( "Opened file: INPUT\n" );
-	}
 
-	output = fopen( "master_database.csv", "r" );
+	output = fopen( OUTPUT_FILE, "r" );
 	if ( output == NULL )
 	{
-		fprintf( stderr, "Error opening file: master_database.csv\n" );
+		fprintf( stderr, "Error opening file: %s\n", OUTPUT_FILE );
 		return 1;
 	}
 
@@ -170,6 +169,7 @@ void addNode( ItemNode_t **node )
 }
 
 // function to alphabetize a linked list by the name field
+/* DO NOT TOUCH! */
 void alpha( ItemNode_t* list )
 {
 	ItemNode_t *working = NULL;
@@ -184,9 +184,19 @@ void alpha( ItemNode_t* list )
 	{
 		compare = strcmp( prev->name, working->name );
 
-		if ( compare <= 0 )
+		/* Compare on name field MUST be split into three conditionals */
+		if ( compare < 0 )
 		{
-			// nodes name field are in alphabetical order
+			// nodes are in alphabetical order
+			// advances node pointers to next node
+			prev = prev->next;
+			working = working->next;
+			continue;
+		}
+		else if ( compare == 0 )
+		{
+			// nodes name of item matches
+			// sorts by owner name
 			sub_compare = strcmp( prev->owner, working->owner );
 			if ( sub_compare <= 0 )
 			{
@@ -196,7 +206,7 @@ void alpha( ItemNode_t* list )
 				working = working->next;
 				continue;
 			}
-			else if ( sub_compare > 0 && compare == 0 )
+			else if ( sub_compare > 0 )
 			{
 				// nodes owner field are not in alphabetical order
 				nodecpy( prev, &temp );
@@ -232,4 +242,11 @@ void nodecpy( ItemNode_t* from, ItemNode_t* to )
 	strcpy( to->name, from->name );
 	to->count = from->count;
 	strcpy( to->owner, from->owner );
+}
+
+void printNode( ItemNode_t node )
+{
+	// prints the contents of a node to the stdout in final output format
+	// it is recomended to redirect stdout to a log file
+	fprintf( stdout, "%s,%d,%s\n", node.name, node.count, node.owner );
 }
