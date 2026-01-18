@@ -1,36 +1,24 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "defs.h"
 
-#define LINE_MAX	1024
 #define INPUT_FILE	"input.csv"
 #define OUTPUT_FILE "master_database.csv"
 
-// struct name will be updated to match other programs in the future
-typedef struct ItemNode
-{
-	char name[25];
-	int count;
-	char owner[15];
-	struct ItemNode* next;
-} ItemNode_t;
+void alpha( item_t* list );
+void nodecpy( item_t* from, item_t* to );
+void printNode( item_t node );	// used for debuging if needed
 
-void addNode( ItemNode_t **node );
-void alpha( ItemNode_t* list );
-void nodecpy( ItemNode_t* from, ItemNode_t* to );
-void printNode( ItemNode_t node );	// used for debuging if needed
-
-ItemNode_t database_list;	// global variable to allow list to be accesed directly everywhere
-ItemNode_t ingest_list;		// global variable to allow list to be accesed directly everywhere
+item_t database_list;	// global variable to allow list to be accesed directly everywhere
+item_t ingest_list;		// global variable to allow list to be accesed directly everywhere
 
 int main()
 {
-	ItemNode_t *list_start;		// structure pointer
-	ItemNode_t *data_node;	// structure pointer
-	ItemNode_t *ingest_node;	// structure pointer
-	ItemNode_t *prev_node;		// structure pointer
-	ItemNode_t transfer;
+	item_t *list_start;		// structure pointer
+	item_t *data_node;		// structure pointer
+	item_t *ingest_node;	// structure pointer
+	item_t *prev_node;		// structure pointer
+	item_t transfer;
 	FILE *output;
 	FILE *ingest;
 	char line[LINE_MAX];
@@ -160,22 +148,13 @@ int main()
 	fclose( output );
 }
 
-// adds new node and advances the current_node pointer
-void addNode( ItemNode_t **node )
-{
-	(*node)->next = ( ItemNode_t* )malloc( sizeof( ItemNode_t ) );
-	*node = (*node)->next;
-	// defaults the pointer to next node to NULL for last node in list
-	(*node)->next = NULL;
-}
-
 // function to alphabetize a linked list by the name field
 /* DO NOT TOUCH! */
-void alpha( ItemNode_t* list )
+void alpha( item_t* list )
 {
-	ItemNode_t *working = NULL;
-	ItemNode_t *prev = NULL;
-	ItemNode_t temp;
+	item_t *working = NULL;
+	item_t *prev = NULL;
+	item_t temp;
 	prev = list;
 	working = prev->next;
 	int compare = 0;
@@ -238,14 +217,14 @@ void alpha( ItemNode_t* list )
 }
 
 // copies the contents of one structure to another
-void nodecpy( ItemNode_t* from, ItemNode_t* to )
+void nodecpy( item_t* from, item_t* to )
 {
 	strcpy( to->name, from->name );
 	to->count = from->count;
 	strcpy( to->owner, from->owner );
 }
 
-void printNode( ItemNode_t node )
+void printNode( item_t node )
 {
 	// prints the contents of a node to the stdout in final output format
 	// it is recomended to redirect stdout to a log file
