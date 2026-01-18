@@ -7,6 +7,7 @@
 #define INPUT_FILE	"input.csv"
 #define OUTPUT_FILE "master_database.csv"
 
+// struct name will be updated to match other programs in the future
 typedef struct ItemNode
 {
 	char name[25];
