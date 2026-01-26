@@ -1,4 +1,3 @@
-#include <string.h>
 #include <stdbool.h>
 #include "defs.h"
 
@@ -7,7 +6,6 @@
 
 void alpha( item_t* list );
 void nodecpy( item_t* from, item_t* to );
-void printNode( item_t node );	// used for debuging if needed
 
 item_t database_list;	// global variable to allow list to be accesed directly everywhere
 item_t ingest_list;		// global variable to allow list to be accesed directly everywhere
@@ -222,11 +220,4 @@ void nodecpy( item_t* from, item_t* to )
 	strcpy( to->name, from->name );
 	to->count = from->count;
 	strcpy( to->owner, from->owner );
-}
-
-void printNode( item_t node )
-{
-	// prints the contents of a node to the stdout in final output format
-	// it is recomended to redirect stdout to a log file
-	fprintf( stdout, "%s,%d,%s\n", node.name, node.count, node.owner );
 }
