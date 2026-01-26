@@ -6,6 +6,7 @@
 
 void alpha( item_t* list );
 void nodecpy( item_t* from, item_t* to );
+void listShift( item_t *node );
 
 item_t database_list;	// global variable to allow list to be accesed directly everywhere
 item_t ingest_list;		// global variable to allow list to be accesed directly everywhere
@@ -16,6 +17,7 @@ int main()
 	item_t *data_node;		// structure pointer
 	item_t *ingest_node;	// structure pointer
 	item_t *prev_node;		// structure pointer
+	item_t *trash_node;		// structure pointer
 	item_t transfer;
 	FILE *output;
 	FILE *ingest;
@@ -136,6 +138,21 @@ int main()
 		return 1;
 	}
 
+	// removes zero value records
+	for ( data_node = &database_list; data_node != NULL; data_node = data_node->next )
+	{
+		if ( data_node->count == 0 && data_node->next != NULL )
+		{
+			listShift( data_node );
+		}
+		else if ( data_node->count == 0 )
+		{
+			nodecpy( data_node->next, data_node );
+			free( data_node->next );
+			data_node->next = NULL;
+		}
+	}
+
 	// alphabetize the database list
 	alpha( &database_list );
 
@@ -220,4 +237,19 @@ void nodecpy( item_t* from, item_t* to )
 	strcpy( to->name, from->name );
 	to->count = from->count;
 	strcpy( to->owner, from->owner );
+}
+
+void listShift( item_t *node )
+{
+	nodecpy( node->next, node );
+
+	if ( node->next->next == NULL )
+	{
+		free( node->next );
+		node->next = NULL;
+	}
+	else
+	{
+		listShift( node->next );
+	}
 }
